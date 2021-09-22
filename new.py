@@ -1,10 +1,17 @@
-from datetime import datetime
-
-from sqlalchemy import Column, Integer, String, Numeric
-from sqlalchemy import DateTime
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
+
+from models.movie import Movie
+from models.movie import MovieGenre
+from models.movie import MovieProductionCompany
+from models.movie import MovieCollection
+from models.movie import MovieProductionCountry
+from models.movie import Genre
+from models.movie import ProductionCompany
+from models.movie import ProductionCountry
+from models.movie import Collection
+
 
 import TMDBRequest
 
@@ -13,7 +20,6 @@ Session = sessionmaker(bind=engine)
 session = Session()
 
 Base = declarative_base()
-
 
 def save_movie_details(movie_json: dict):
     if session.query(Movie).filter(Movie.movie_id == movie_json['id']).first() is None:
@@ -105,85 +111,6 @@ def save_movie_details(movie_json: dict):
 
     return 0
 
-
-class Movie(Base):
-    __tablename__ = 'movie'
-
-    movie_id = Column(Integer(), primary_key=True)
-    movie_title = Column(String(100), nullable=False)
-    imdb_id = Column(String(20), nullable=False)
-    release_date = Column(DateTime())
-    runtime_mins = Column(Integer())
-    budget = Column(Numeric(20, 2))
-    revenue = Column(Numeric(20, 2))
-    language = Column(String(5))
-    overview = Column(String(1000))
-    tagline = Column(String(255))
-    status = Column(String(10))
-    vote_average = Column(Numeric(5, 2))
-    vote_count = Column(Integer())
-    popularity = Column(Numeric(5, 2))
-    created_on = Column(DateTime(), default=datetime.now)
-    updated_on = Column(DateTime(), default=datetime.now, onupdate=datetime.now)
-
-
-class Genre(Base):
-    __tablename__ = 'genre'
-
-    genre_id = Column(Integer(), primary_key=True)
-    genre_descr = Column(String(100), nullable=False, unique=True)
-
-
-class MovieGenre(Base):
-    __tablename__ = 'movie_genre'
-
-    movie_id = Column(Integer(), primary_key=True)
-    genre_id = Column(Integer(), primary_key=True)
-
-
-class Collection(Base):
-    __tablename__ = 'collection'
-
-    collection_id = Column(Integer(), primary_key=True)
-    collection_descr = Column(String(100), nullable=False, unique=True)
-
-
-class MovieCollection(Base):
-    __tablename__ = 'movie_collection'
-
-    movie_id = Column(Integer(), primary_key=True)
-    collection_id = Column(Integer(), primary_key=True)
-
-
-class ProductionCompany(Base):
-    __tablename__ = 'production_company'
-
-    production_company_id = Column(Integer(), primary_key=True)
-    production_company_descr = Column(String(100), unique=True)
-    origin_country = Column(String(5))
-
-
-class MovieProductionCompany(Base):
-    __tablename__ = 'movie_production_company'
-
-    movie_id = Column(Integer(), primary_key=True)
-    production_company_id = Column(Integer(), primary_key=True)
-
-
-class ProductionCountry(Base):
-    __tablename__ = 'production_country'
-
-    production_country_code = Column(String(5), primary_key=True)
-    production_country_descr = Column(String(100), unique=True)
-
-
-class MovieProductionCountry(Base):
-    __tablename__ = 'movie_production_country'
-
-    movie_id = Column(Integer(), primary_key=True)
-    production_country_code = Column(String(5), primary_key=True)
-
-
 Base.metadata.create_all(engine)
 
 # response = requests.get('https://api.themoviedb.org/3/movie/285?api_key=' + API_KEY)
@@ -193,10 +120,6 @@ for movie_id in range(1, 1490):
     print('Retrieving movie details:', movie_id)
 
     try:
-
-        # response = requests.get(BASE_URL + str(movie_id) + BASE_URL_END)
-
-        # movie = response.json()
 
         movie = TMDBRequest.get_movie_details(movie_id)
 
