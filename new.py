@@ -21,6 +21,8 @@ session = Session()
 
 Base = declarative_base()
 
+Base.metadata.create_all(engine)
+
 def save_movie_details(movie_json: dict):
     if session.query(Movie).filter(Movie.movie_id == movie_json['id']).first() is None:
         movie_to_add = Movie(
@@ -112,8 +114,6 @@ def save_movie_details(movie_json: dict):
     return 0
 
 Base.metadata.create_all(engine)
-
-# response = requests.get('https://api.themoviedb.org/3/movie/285?api_key=' + API_KEY)
 
 for movie_id in range(1, 1490):
 

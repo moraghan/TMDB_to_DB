@@ -6,16 +6,17 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
-# engine = create_engine('postgresql+psycopg2://postgres:postgres@localhost:5432/imdb')
-# Session = sessionmaker(bind=engine)
-# session = Session()
+engine = create_engine('postgresql+psycopg2://postgres:postgres@localhost:5432/imdb')
+Session = sessionmaker(bind=engine)
+session = Session()
 
 Base = declarative_base()
+
 
 class Movie(Base):
     __tablename__ = 'movie'
 
-    movie_id = Column(Integer(), primary_key=True)
+    movie_id = Column(Integer(), primary_key=True, autoincrement=False)
     movie_title = Column(String(100), nullable=False)
     imdb_id = Column(String(20), nullable=False)
     release_date = Column(DateTime())
@@ -90,4 +91,4 @@ class MovieProductionCountry(Base):
     production_country_code = Column(String(5), primary_key=True)
 
 
-#Base.metadata.create_all(engine)
+Base.metadata.create_all(engine)
