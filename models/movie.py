@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sqlalchemy import Column, Integer, String, Numeric
+from sqlalchemy import Column, Integer, String, Numeric, ForeignKey
 from sqlalchemy import DateTime
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
@@ -37,21 +37,21 @@ class Movie(Base):
 class Genre(Base):
     __tablename__ = 'genre'
 
-    genre_id = Column(Integer(), primary_key=True)
+    genre_id = Column(Integer(), primary_key=True, autoincrement=False)
     genre_descr = Column(String(100), nullable=False, unique=True)
 
 
 class MovieGenre(Base):
     __tablename__ = 'movie_genre'
 
-    movie_id = Column(Integer(), primary_key=True)
-    genre_id = Column(Integer(), primary_key=True)
+    movie_id = Column(Integer(), ForeignKey('movie.movie_id'),primary_key=True)
+    genre_id = Column(Integer(), ForeignKey('genre.genre_id'),primary_key=True)
 
 
 class Collection(Base):
     __tablename__ = 'collection'
 
-    collection_id = Column(Integer(), primary_key=True)
+    collection_id = Column(Integer(), primary_key=True, autoincrement=False)
     collection_descr = Column(String(100), nullable=False, unique=True)
 
 
@@ -65,7 +65,7 @@ class MovieCollection(Base):
 class ProductionCompany(Base):
     __tablename__ = 'production_company'
 
-    production_company_id = Column(Integer(), primary_key=True)
+    production_company_id = Column(Integer(), primary_key=True, autoincrement=False)
     production_company_descr = Column(String(100), unique=True)
     origin_country = Column(String(5))
 
@@ -80,7 +80,7 @@ class MovieProductionCompany(Base):
 class ProductionCountry(Base):
     __tablename__ = 'production_country'
 
-    production_country_code = Column(String(5), primary_key=True)
+    production_country_code = Column(String(5), primary_key=True, autoincrement=False)
     production_country_descr = Column(String(100), unique=True)
 
 
