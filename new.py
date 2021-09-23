@@ -24,6 +24,7 @@ Base = declarative_base()
 Base.metadata.create_all(engine)
 
 def save_movie_details(movie_json: dict):
+
     if session.query(Movie).filter(Movie.movie_id == movie_json['id']).first() is None:
         movie_to_add = Movie(
 

@@ -58,8 +58,8 @@ class Collection(Base):
 class MovieCollection(Base):
     __tablename__ = 'movie_collection'
 
-    movie_id = Column(Integer(), primary_key=True)
-    collection_id = Column(Integer(), primary_key=True)
+    movie_id = Column(Integer(), ForeignKey('movie.movie_id'), primary_key=True)
+    collection_id = Column(Integer(), ForeignKey('collection.collection_id'), primary_key=True)
 
 
 class ProductionCompany(Base):
@@ -73,8 +73,8 @@ class ProductionCompany(Base):
 class MovieProductionCompany(Base):
     __tablename__ = 'movie_production_company'
 
-    movie_id = Column(Integer(), primary_key=True)
-    production_company_id = Column(Integer(), primary_key=True)
+    movie_id = Column(Integer(), ForeignKey('movie.movie_id'), primary_key=True)
+    production_company_id = Column(Integer(), ForeignKey('production_company.production_company_id'), primary_key=True)
 
 
 class ProductionCountry(Base):
@@ -87,8 +87,8 @@ class ProductionCountry(Base):
 class MovieProductionCountry(Base):
     __tablename__ = 'movie_production_country'
 
-    movie_id = Column(Integer(), primary_key=True)
-    production_country_code = Column(String(5), primary_key=True)
+    movie_id = Column(Integer(), ForeignKey('movie.movie_id'), primary_key=True)
+    production_country_code = Column(String(5),ForeignKey('production_country.production_country_code'), primary_key=True)
 
 
 Base.metadata.create_all(engine)
