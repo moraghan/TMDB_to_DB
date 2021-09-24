@@ -9,3 +9,9 @@ def get_movie_details(movie_id):
     movie_details.encoding = 'utf-8'
     if movie_details:
         return movie_details.json()
+
+def get_movie_credits(movie_id):
+    movie_credits = requests.get(BASE_URL + str(movie_id) +'/credits'+ BASE_URL_END)
+    movie_credits.encoding = 'utf-8'
+    if movie_credits:
+        return movie_credits.json()

@@ -9,6 +9,7 @@ from models.movie import Movie
 from models.movie import MovieGenre
 from models.movie import MovieProductionCompany
 from models.movie import MovieProductionCountry
+from models.movie import MovieCollection
 from models.movie import ProductionCompany
 from models.movie import ProductionCountry
 
@@ -45,14 +46,8 @@ def save_movie_details(movie_json: dict):
 
     if movie_json['belongs_to_collection']:
 
-        #_collection_id = None
-        for key, value in movie_json['belongs_to_collection'].items():
-
-            if key == 'id':
-                _collection_id = value
-
-            if key == 'name':
-                _collection_descr = value
+        _collection_id = movie_json['belongs_to_collection']['id']
+        _collection_descr = movie_json['belongs_to_collection']['name']
 
         if session.query(Collection).filter(Collection.collection_id == _collection_id).first() is None:
             collection_to_add = Collection(
@@ -60,6 +55,14 @@ def save_movie_details(movie_json: dict):
                 collection_descr=_collection_descr
             )
             session.add(collection_to_add)
+
+        if session.query(MovieCollection).filter(MovieCollection.movie_id == movie_json['id'],
+                                            MovieCollection.collection_id == _collection_id).first() is None:
+            movie_collection_to_add = MovieCollection(
+                movie_id=movie_json['id'],
+                collection_id=_collection_id
+            )
+            session.add(movie_collection_to_add)
 
     for genre in movie_json['genres']:
 
@@ -139,6 +142,7 @@ for movie_id in range(36557, 46559):
     try:
 
         movie = TMDBRequest.get_movie_details(movie_id)
+        credits = TMDBRequest.get_movie_credits(movie_id)
 
         if movie:
             save_movie_details(movie)
