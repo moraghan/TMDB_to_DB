@@ -2,18 +2,15 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
+import TMDBRequest
+from models.movie import Collection
+from models.movie import Genre
 from models.movie import Movie
 from models.movie import MovieGenre
 from models.movie import MovieProductionCompany
-from models.movie import MovieCollection
 from models.movie import MovieProductionCountry
-from models.movie import Genre
 from models.movie import ProductionCompany
 from models.movie import ProductionCountry
-from models.movie import Collection
-
-
-import TMDBRequest
 
 engine = create_engine('postgresql+psycopg2://postgres:postgres@localhost:5432/imdb')
 Session = sessionmaker(bind=engine)
@@ -23,8 +20,8 @@ Base = declarative_base()
 
 Base.metadata.create_all(engine)
 
-def save_movie_details(movie_json: dict):
 
+def save_movie_details(movie_json: dict):
     if session.query(Movie).filter(Movie.movie_id == movie_json['id']).first() is None:
         movie_to_add = Movie(
 
@@ -45,6 +42,24 @@ def save_movie_details(movie_json: dict):
 
         )
         session.add(movie_to_add)
+
+    if movie_json['belongs_to_collection']:
+
+        #_collection_id = None
+        for key, value in movie_json['belongs_to_collection'].items():
+
+            if key == 'id':
+                _collection_id = value
+
+            if key == 'name':
+                _collection_descr = value
+
+        if session.query(Collection).filter(Collection.collection_id == _collection_id).first() is None:
+            collection_to_add = Collection(
+                collection_id=_collection_id,
+                collection_descr=_collection_descr
+            )
+            session.add(collection_to_add)
 
     for genre in movie_json['genres']:
 
@@ -114,9 +129,10 @@ def save_movie_details(movie_json: dict):
 
     return 0
 
+
 Base.metadata.create_all(engine)
 
-for movie_id in range(1, 1490):
+for movie_id in range(36557, 46559):
 
     print('Retrieving movie details:', movie_id)
 
