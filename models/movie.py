@@ -5,6 +5,7 @@ from sqlalchemy import DateTime
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.dialects.postgresql import JSONB
 
 engine = create_engine('postgresql+psycopg2://postgres:postgres@localhost:5432/imdb')
 Session = sessionmaker(bind=engine)
@@ -30,6 +31,7 @@ class Movie(Base):
     vote_average = Column(Numeric(5, 2))
     vote_count = Column(Integer())
     popularity = Column(Numeric(5, 2))
+    json_request = Column(JSONB)
     created_on = Column(DateTime(), default=datetime.now)
     updated_on = Column(DateTime(), default=datetime.now, onupdate=datetime.now)
 
@@ -90,5 +92,12 @@ class MovieProductionCountry(Base):
     movie_id = Column(Integer(), ForeignKey('movie.movie_id'), primary_key=True)
     production_country_code = Column(String(5),ForeignKey('production_country.production_country_code'), primary_key=True)
 
+class MovieRequest(Base):
+    __tablename__ = 'movie_request'
+
+    request_id = Column(Integer(), primary_key=True, autoincrement=True)
+    request_type = Column(String(20))
+    request_key = Column(Integer())
+    json_request = Column(JSONB)
 
 Base.metadata.create_all(engine)

@@ -2,6 +2,8 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
+
+
 import TMDBRequest
 from models.movie import Collection
 from models.movie import Genre
@@ -39,7 +41,8 @@ def save_movie_details(movie_json: dict):
             status=movie_json['status'],
             vote_average=movie_json['vote_average'],
             vote_count=movie_json['vote_count'],
-            popularity=movie_json['popularity']
+            popularity=movie_json['popularity'],
+            json_request=movie_json
 
         )
         session.add(movie_to_add)
