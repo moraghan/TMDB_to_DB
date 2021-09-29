@@ -1,27 +1,33 @@
 
 import requests
-import sys
 import json
 
-from sqlalchemy import Column, Integer, String, select
+from sqlalchemy import Column, Integer, String
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.dialects.postgresql import JSONB
 
-if sys.argv[1]:
-    lower_request_id = int(sys.argv[1])
-else:
-    lower_request_id = 1
+# if sys.argv[1]:
+#     lower_request_id = int(sys.argv[1])
+# else:
+#     lower_request_id = 1
+#
+# if sys.argv[2]:
+#     upper_request_id = int(sys.argv[2])
+# else:
+#     upper_request_id = 100000
 
-if sys.argv[2]:
-    upper_request_id = int(sys.argv[2])
-else:
-    upper_request_id = 100000
 
 
-
-#request_types = {['collection', 'person', 'movie', 'company', 'credit']}
+request_types_limits = [{"movie":  1000000 },
+                        {"person": 1000000 },
+                        {"collection": 20000},
+                        {"company": 10000},
+                        {"credit": 1000000},
+                        {"keyword": 10000},
+                        {"people": 1000000}
+                        ]
 
 API_KEY = 'dd764c65e8685d30f05dddbe0f2f9e04'
 BASE_URL = 'https://api.themoviedb.org/3/'
@@ -41,55 +47,52 @@ class MovieRequest(Base):
     request_key = Column(Integer())
     json_request = Column(JSONB)
 
-class RequestType(Base):
-    __tablename__ = 'request_type'
-
-    request_type_id = Column(Integer(), primary_key=True, autoincrement=True)
-    request_type = Column(String(20))
-    lower_request_key = Column(Integer())
-    upper_request_key = Column(Integer())
 
 Base.metadata.create_all(engine)
-
-movie_request_type = RequestType(request_type = 'movie', lower_request_key = 1, upper_request_key = 200 )
-session.add(movie_request_type)
 
 session.commit()
 
 #for _request_id in range(int(lower_request_id), int(upper_request_id)):
-for _request_id in range(605, 606):
+for _request_id in range(1, 1000000):
 
-    rows = session.execute(select(RequestType.request_type)).all()
+    for request_type in range(len(request_types_limits)):
+        for key in request_types_limits[request_type]:
+            upper_limit = request_types_limits[request_type][key]
+            print(_request_id, key,upper_limit )
 
-    for request_type in rows :
+            if upper_limit > _request_id:
 
-        print(f'Retrieving details for Type {request_type} and Request Id {_request_id}')
+                print(f'Retrieving details for Type {key} and Request Id {_request_id}')
 
-        try:
+                try:
 
-            url = BASE_URL + str(request_type) + '/' + str(_request_id) + BASE_URL_END
-            _response_data = requests.get(url)
+                    if key == 'credit':
+                        url = BASE_URL + 'movie' + '/' + str(_request_id) + '/credits' + BASE_URL_END
+                    else:
+                        url = BASE_URL + str(key) + '/' + str(_request_id) + BASE_URL_END
 
-            if _response_data.status_code == 200:
+                    print(url)
+                    _response_data = requests.get(url)
 
-                response_data = json.loads(_response_data.text)
-                print(response_data['request_key'])
+                    if _response_data.status_code == 200:
 
-                if session.query(MovieRequest).filter(MovieRequest.request_key == _request_id,
-                                                                MovieRequest.request_type == request_type).first() is None:
+                        response_data = json.loads(_response_data.text)
 
-                    request_to_add = MovieRequest(
-                        request_type=request_type,
-                        request_key=_request_id,
-                        json_request=response_data)
+                        if session.query(MovieRequest).filter(MovieRequest.request_key == _request_id,
+                                                                        MovieRequest.request_type == key).first() is None:
 
-                    session.add(request_to_add)
-                    session.commit()
+                            request_to_add = MovieRequest(
+                                request_type=key,
+                                request_key=_request_id,
+                                json_request=response_data)
 
-        except Exception as e:
-            print("Failed trying to return information for:", e)
-            raise e
+                            session.add(request_to_add)
+                            session.commit()
 
-        finally:
+                except Exception as e:
+                    print("Failed trying to return information for:", e)
+                    raise e
 
-            session.close()
+                finally:
+
+                    session.close()
