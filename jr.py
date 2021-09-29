@@ -1,12 +1,11 @@
-
-import requests
 import json
 
+import requests
 from sqlalchemy import Column, Integer, String
 from sqlalchemy import create_engine
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy.dialects.postgresql import JSONB
 
 # if sys.argv[1]:
 #     lower_request_id = int(sys.argv[1])
@@ -19,9 +18,8 @@ from sqlalchemy.dialects.postgresql import JSONB
 #     upper_request_id = 100000
 
 
-
-request_types_limits = [{"movie":  1000000 },
-                        {"person": 1000000 },
+request_types_limits = [{"movie": 1000000},
+                        {"person": 1000000},
                         {"collection": 20000},
                         {"company": 10000},
                         {"credit": 1000000},
@@ -39,6 +37,7 @@ session = Session()
 
 Base = declarative_base()
 
+
 class MovieRequest(Base):
     __tablename__ = 'movie_request'
 
@@ -52,13 +51,14 @@ Base.metadata.create_all(engine)
 
 session.commit()
 
-#for _request_id in range(int(lower_request_id), int(upper_request_id)):
+# for _request_id in range(int(lower_request_id), int(upper_request_id)):
 for _request_id in range(1, 1000000):
 
     for request_type in range(len(request_types_limits)):
+
         for key in request_types_limits[request_type]:
+
             upper_limit = request_types_limits[request_type][key]
-            print(_request_id, key,upper_limit )
 
             if upper_limit > _request_id:
 
@@ -66,20 +66,18 @@ for _request_id in range(1, 1000000):
 
                 try:
 
-                    if key == 'credit':
-                        url = BASE_URL + 'movie' + '/' + str(_request_id) + '/credits' + BASE_URL_END
-                    else:
-                        url = BASE_URL + str(key) + '/' + str(_request_id) + BASE_URL_END
+                    if session.query(MovieRequest).filter(MovieRequest.request_key == _request_id,
+                                                          MovieRequest.request_type == key).first() is None:
 
-                    print(url)
-                    _response_data = requests.get(url)
+                        if key == 'credit':
+                            url = BASE_URL + 'movie' + '/' + str(_request_id) + '/credits' + BASE_URL_END
+                        else:
+                            url = BASE_URL + str(key) + '/' + str(_request_id) + BASE_URL_END
 
-                    if _response_data.status_code == 200:
+                        _response_data = requests.get(url)
 
-                        response_data = json.loads(_response_data.text)
-
-                        if session.query(MovieRequest).filter(MovieRequest.request_key == _request_id,
-                                                                        MovieRequest.request_type == key).first() is None:
+                        if _response_data.status_code == 200:
+                            response_data = json.loads(_response_data.text)
 
                             request_to_add = MovieRequest(
                                 request_type=key,
@@ -88,6 +86,10 @@ for _request_id in range(1, 1000000):
 
                             session.add(request_to_add)
                             session.commit()
+
+                    else:
+
+                        print('Record already exists so skipping Request')
 
                 except Exception as e:
                     print("Failed trying to return information for:", e)
