@@ -38,13 +38,13 @@ session = Session()
 Base = declarative_base()
 
 
-class MovieRequest(Base):
-    __tablename__ = 'movie_request'
+class TMDBRequest(Base):
+    __tablename__ = 'tmdb_request'
 
     request_id = Column(Integer(), primary_key=True, autoincrement=True)
     request_type = Column(String(20))
     request_key = Column(Integer())
-    json_request = Column(JSONB)
+    json_response = Column(JSONB)
     __table_args__ = (Index('request_unique_idx', request_key, request_type),)
 
 
@@ -67,8 +67,8 @@ for _request_id in range(1, 1000000):
 
                 try:
 
-                    if session.query(MovieRequest).filter(MovieRequest.request_key == _request_id,
-                                                          MovieRequest.request_type == key).first() is None:
+                    if session.query(TMDBRequest).filter(TMDBRequest.request_key == _request_id,
+                                                         TMDBRequest.request_type == key).first() is None:
 
                         if key == 'credit':
                             url = BASE_URL + 'movie' + '/' + str(_request_id) + '/credits' + BASE_URL_END
@@ -80,10 +80,10 @@ for _request_id in range(1, 1000000):
                         if _response_data.status_code == 200:
                             response_data = json.loads(_response_data.text)
 
-                            request_to_add = MovieRequest(
+                            request_to_add = TMDBRequest(
                                 request_type=key,
                                 request_key=_request_id,
-                                json_request=response_data)
+                                json_response=response_data)
 
                             session.add(request_to_add)
                             session.commit()
