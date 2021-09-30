@@ -1,7 +1,7 @@
 import json
 
 import requests
-from sqlalchemy import Column, Integer, String
+from sqlalchemy import Column, Integer, String, Index
 from sqlalchemy import create_engine
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.ext.declarative import declarative_base
@@ -45,6 +45,7 @@ class MovieRequest(Base):
     request_type = Column(String(20))
     request_key = Column(Integer())
     json_request = Column(JSONB)
+    __table_args__ = (Index('request_unique_idx', request_key, request_type),)
 
 
 Base.metadata.create_all(engine)
