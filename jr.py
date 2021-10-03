@@ -6,6 +6,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
+from colorama import Fore, Back, Style
 
 # if sys.argv[1]:
 #     lower_request_id = int(sys.argv[1])
@@ -95,6 +96,10 @@ def process_requests_for_type(request_type):
 
                 session.add(request_to_add)
                 session.commit()
+
+            else :
+                print(Fore.RED + f'Request Type {request_type} does not retrieve anything for Request Id {next_key}')
+                print(Style.RESET_ALL)
 
         else:
 
