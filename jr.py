@@ -89,12 +89,12 @@ def process_requests_for_type(request_type):
             if _response_data.status_code == 200:
                 response_data = json.loads(_response_data.text)
 
-                request_to_add = TMDBRequest(
+                response_to_add = TMDBRequest(
                     request_type=request_type,
                     request_key=next_key,
                     json_response=response_data)
 
-                session.add(request_to_add)
+                session.add(response_to_add)
                 session.commit()
 
             else :
