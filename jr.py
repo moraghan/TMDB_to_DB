@@ -19,15 +19,14 @@ from colorama import Fore, Back, Style
 #     upper_request_id = 100000
 
 
-
-request_types_limits = {"movie"     : 1000000,
-                        "person"    : 1000000,
+request_types_limits = {"movie": 1000000,
+                        "person": 1000000,
                         "collection": 20000,
-                        "company"   : 10000,
-                        "credit"    : 1000000,
-                        "keyword"   : 10000,
-                        "people"    : 1000000
-                       }
+                        "company": 10000,
+                        "credit": 1000000,
+                        "keyword": 10000,
+                        "people": 1000000
+                        }
 
 API_KEY = 'dd764c65e8685d30f05dddbe0f2f9e04'
 BASE_URL = 'https://api.themoviedb.org/3/'
@@ -54,35 +53,34 @@ Base.metadata.create_all(engine)
 
 session.commit()
 
-def process_requests_for_type(request_type):
 
+def process_requests_for_type(request_type):
     request_type_upper_limit = request_types_limits.get(request_type, None)
 
-    if not request_type_upper_limit :
-       print('unknown category')
-       return -1
-
+    if not request_type_upper_limit:
+        print('unknown category')
+        return -1
 
     _last_key = session.query(func.max(TMDBRequest.request_key).filter(TMDBRequest.request_type == request_type)).one()
 
     if _last_key[0]:
-        next_key = _last_key[0]
+        current_key = _last_key[0]
     else:
-         next_key = 0
+        current_key = 0
 
-    while next_key < request_type_upper_limit:
+    while current_key < request_type_upper_limit:
 
-        next_key += 1
+        current_key += 1
 
-        print(f'Retrieving details for Type {request_type} and Request Id {next_key}')
+        print(f'Retrieving details for Type {request_type} and Request Id {current_key}')
 
-        if session.query(TMDBRequest).filter(TMDBRequest.request_key == next_key,
+        if session.query(TMDBRequest).filter(TMDBRequest.request_key == current_key,
                                              TMDBRequest.request_type == request_type).first() is None:
 
             if request_type == 'credit':
-                url = BASE_URL + 'movie' + '/' + str(next_key) + '/credits' + BASE_URL_END
+                url = BASE_URL + 'movie' + '/' + str(current_key) + '/credits' + BASE_URL_END
             else:
-                url = BASE_URL + str(request_type) + '/' + str(next_key) + BASE_URL_END
+                url = BASE_URL + str(request_type) + '/' + str(current_key) + BASE_URL_END
 
             _response_data = requests.get(url)
 
@@ -91,14 +89,14 @@ def process_requests_for_type(request_type):
 
                 response_to_add = TMDBRequest(
                     request_type=request_type,
-                    request_key=next_key,
+                    request_key=current_key,
                     json_response=response_data)
 
                 session.add(response_to_add)
                 session.commit()
 
-            else :
-                print(Fore.RED + f'Request Type {request_type} does not retrieve anything for Request Id {next_key}')
+            else:
+                print(Fore.RED + f'Request Type {request_type} does not retrieve anything for Request Id {current_key}')
                 print(Style.RESET_ALL)
 
         else:
@@ -106,9 +104,7 @@ def process_requests_for_type(request_type):
             print('Record already exists so skipping Request')
 
 
-
 process_requests_for_type('movie')
-
 
 # for _request_id in range(int(lower_request_id), int(upper_request_id)):
 for _request_id in range(1, 1000000):
