@@ -1,0 +1,37 @@
+create or replace view vgenres(genre_id, genre_descr) as
+with cte as (
+    select distinct jsonb_array_elements(tmdb_request.json_response -> 'genres'::text) -> 'id'::text    as genre_id,
+                    jsonb_array_elements(tmdb_request.json_response -> 'genres'::text) ->> 'name'::text as genre_descr
+    from tmdb_request
+    where tmdb_request.request_type::text = 'movie'::text
+)
+select cte.genre_id::integer                   as genre_id,
+       cte.genre_descr::character varying(500) as genre_descr
+from cte;
+
+alter table vgenres
+    owner to moraghan;
+
+
+create or replace view vproduction_companies
+            (production_company_id, production_company_descr, logo_path, origin_country) as
+with cte as (
+    select distinct jsonb_array_elements(tmdb_request.json_response -> 'production_companies'::text) ->
+                    'id'::text                                                                                        as production_company_id,
+                    jsonb_array_elements(tmdb_request.json_response -> 'production_companies'::text) ->>
+                    'name'::text                                                                                      as production_company_descr,
+                    jsonb_array_elements(tmdb_request.json_response -> 'production_companies'::text) ->>
+                    'logo_path'::text                                                                                 as logo_path,
+                    jsonb_array_elements(tmdb_request.json_response -> 'production_companies'::text) ->>
+                    'origin_country'::text                                                                            as origin_country
+    from tmdb_request
+    where tmdb_request.request_type::text = 'movie'::text
+)
+select cte.production_company_id::integer                   as production_company_id,
+       cte.production_company_descr::character varying(500) as production_company_descr,
+       cte.logo_path::character varying(500)                as logo_path,
+       cte.origin_country::character varying(500)           as origin_country
+from cte;
+
+alter table vproduction_companies
+    owner to moraghan;
