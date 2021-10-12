@@ -1,0 +1,30 @@
+APP:
+  ENVIRONMENT: test
+  DEBUG: True
+  API_KEY:  'dd764c65e8685d30f05dddbe0f2f9e04'
+  BASE_URL: 'https://api.themoviedb.org/3/'
+
+DATABASE:
+  DATABASE_URL: 'postgresql+psycopg2://postgres:postgres@localhost:5432/imdb'
+  USERNAME: xiaoxu
+  PASSWORD: xiaoxu
+  HOST: 127.0.0.1
+  PORT: 5432
+  DB: xiaoxu_database
+
+TMDB_REQUEST_TYPES:
+  movie:
+    MAX_REQUEST_KEY: 1000000
+  person:
+    MAX_REQUEST_KEY: 1000000
+  collection:
+    MAX_REQUEST_KEY: 20000
+  company:
+    MAX_REQUEST_KEY: 10000
+  credit:
+    MAX_REQUEST_KEY: 1000000
+  keyword:
+    MAX_REQUEST_KEY: 10000
+  people:
+    MAX_REQUEST_KEY: 1000000
+

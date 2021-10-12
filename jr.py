@@ -1,4 +1,6 @@
 import json
+import hydra
+from omegaconf import DictConfig, OmegaConf
 
 import requests
 from colorama import Fore, Style
@@ -8,6 +10,10 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from models.tmdb_request import TMDBRequest
 
+@hydra.main(config_path="config", config_name="config")
+def my_app(cfg: DictConfig) -> dict:
+    _config = OmegaConf.to_yaml(cfg)
+    print(_config)
 
 # if sys.argv[1]:
 #     lower_request_id = int(sys.argv[1])
@@ -19,6 +25,8 @@ from models.tmdb_request import TMDBRequest
 # else:
 #     upper_request_id = 100000
 
+# yaml_config = my_app()
+# print(yaml_config)
 
 request_types_limits = {"movie": 1000000,
                         "person": 1000000,
@@ -78,8 +86,15 @@ def process_requests_for_type(request_type):
                 url = BASE_URL + 'movie' + '/' + str(current_key) + '/credits' + BASE_URL_END
             else:
                 url = BASE_URL + str(request_type) + '/' + str(current_key) + BASE_URL_END
+            try:
 
-            _response_data = requests.get(url)
+                _response_data = requests.get(url)
+
+            except Exception as e:
+
+                print(Fore.RED + f'Error retrieving daat for url {url}')
+                print(Style.RESET_ALL)
+
 
             if _response_data.status_code == 200:
                 response_data = json.loads(_response_data.text)
