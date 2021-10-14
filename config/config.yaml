@@ -15,16 +15,23 @@ DATABASE:
 TMDB_REQUEST_TYPES:
   movie:
     MAX_REQUEST_KEY: 1000000
+    URL: 'https://api:themoviedb.org/3/movie/{id}?api_key={api_key}'
   person:
     MAX_REQUEST_KEY: 1000000
+    URL: 'https://api.themoviedb.org/3/'
   collection:
     MAX_REQUEST_KEY: 20000
+    URL: 'https://api.themoviedb.org/3/'
   company:
     MAX_REQUEST_KEY: 10000
+    URL: 'https://api.themoviedb.org/3/'
   credit:
     MAX_REQUEST_KEY: 1000000
+    URL: 'https://api.themoviedb.org/3/movie/{id}/credits?api_key={api_key}'
   keyword:
     MAX_REQUEST_KEY: 10000
+    URL: 'https://api.themoviedb.org/3/'
   people:
     MAX_REQUEST_KEY: 1000000
+    URL: 'https://api.themoviedb.org/3/'
 

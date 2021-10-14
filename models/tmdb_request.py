@@ -11,6 +11,7 @@ class TMDBRequest(Base):
     request_id = Column(Integer(), primary_key=True, autoincrement=True)
     request_type = Column(String(20), nullable=False)
     request_key = Column(Integer(),nullable=False)
+    request_text = Column(String(100), nullable=False)
     json_response = Column(JSONB)
     __table_args__ = (UniqueConstraint('request_key', 'request_type', name = 'request_key_type_UK'),)
 
