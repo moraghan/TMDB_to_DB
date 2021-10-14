@@ -1,14 +1,12 @@
 import json
-from omegaconf import DictConfig, OmegaConf
 
 import requests
 from colorama import Fore, Style
-from sqlalchemy import func
 from sqlalchemy import create_engine
-from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy import func
 from sqlalchemy.orm import sessionmaker
-
-
+from models.tmdb_request import TMDBRequest
+from helpers import get_db_connection, get_api_key, get_request_types
 
 # if sys.argv[1]:
 #     lower_request_id = int(sys.argv[1])
@@ -23,17 +21,30 @@ from sqlalchemy.orm import sessionmaker
 # yaml_config = my_app()
 # print(yaml_config)
 
-conf = OmegaConf.load('config/config.yaml')
-
-REQUEST_TYPE_INFO = conf.TMDB_REQUEST_TYPES
-
-API_KEY = (conf.APP.API_KEY)
-DB_URL = (conf.DATABASE.DATABASE_URL)
+REQUEST_TYPE_INFO = get_request_types()
+API_KEY = get_api_key()
+DB_URL = get_db_connection()
 
 engine = create_engine(DB_URL)
-Base = declarative_base()
-Base.metadata.create_all(engine)
+#Base = declarative_base()
 
+# from sqlalchemy import Column, Integer, String, UniqueConstraint
+# from sqlalchemy.dialects.postgresql import JSONB
+#
+#
+# class TMDBRequest(Base):
+#     __tablename__ = 'tmdb_requests'
+#
+#     request_id = Column(Integer(), primary_key=True, autoincrement=True)
+#     request_type = Column(String(20), nullable=False)
+#     request_key = Column(Integer(), nullable=False)
+#     request_text = Column(String(100), nullable=False)
+#     json_response = Column(JSONB)
+#     __table_args__ = (UniqueConstraint('request_key', 'request_type', name='request_key_type_UK'),)
+#
+#
+# Base.metadata.create_all(engine)
+#
 Session = sessionmaker(bind=engine)
 
 session = Session()
@@ -41,7 +52,7 @@ session = Session()
 
 def process_requests_for_type(request_type):
 
-    if REQUEST_TYPE_INFO.get(request_type, None) is None :
+    if REQUEST_TYPE_INFO.get(request_type, None) is None:
         print(Fore.RED + f'Request Type {request_type} does not exist. Exiting app.')
         print(Style.RESET_ALL)
         exit(0)
@@ -82,7 +93,7 @@ def process_requests_for_type(request_type):
                     session.add(response_to_add)
                     session.commit()
                 except Exception as e:
-                    print("Failed trying to return information for:", e)
+                    print("Failed trying to creatw information for:", e)
                     raise e
 
 
@@ -97,5 +108,7 @@ def process_requests_for_type(request_type):
         session.close()
 
 
-process_requests_for_type('credit')
 
+if __name__ == "__main__":
+
+    process_requests_for_type('credit')

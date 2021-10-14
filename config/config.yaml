@@ -5,7 +5,7 @@ APP:
   BASE_URL: 'https://api.themoviedb.org/3/'
 
 DATABASE:
-  DATABASE_URL: 'postgresql+psycopg2://postgres:postgres@localhost:5432/imdb'
+  DATABASE_URL: 'postgresql+psycopg2://postgres:postgres@localhost:5432/tmdb'
   USERNAME: xiaoxu
   PASSWORD: xiaoxu
   HOST: 127.0.0.1
