@@ -9,14 +9,6 @@ from sqlalchemy.orm import sessionmaker
 from helpers import get_db_connection, get_api_key, get_request_types
 from models.tmdb_request import TMDBRequest
 
-# if len(sys.argv) == 1:
-#    _request_type = 'movie'
-
-# if sys.argv[1]:
-#     _request_type = sys.argv[1]
-#  else:
-#     _request_type = 'movie'
-
 
 REQUEST_TYPE_INFO = get_request_types()
 API_KEY = get_api_key()
@@ -26,7 +18,7 @@ engine = create_engine(DB_URL)
 Session = sessionmaker(bind=engine)
 session = Session()
 
-def process_requests_for_type(request_type):
+def process_requests_for_type(request_type)->None:
     if REQUEST_TYPE_INFO.get(request_type, None) is None:
         print(Fore.RED + f'Request Type {request_type} does not exist. Exiting app.')
         print(Style.RESET_ALL)
@@ -84,4 +76,4 @@ def process_requests_for_type(request_type):
 
 
 if __name__ == "__main__":
-    process_requests_for_type('person')
+    process_requests_for_type('movie')
