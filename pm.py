@@ -1,18 +1,14 @@
 import json
 
+import click
 import requests
 from colorama import Fore, Style
-import click
-
-
 from sqlalchemy import create_engine
 from sqlalchemy import func
 from sqlalchemy.orm import sessionmaker
 
 from helpers import get_db_connection, get_api_key, get_request_types
 from models.tmdb_request import TMDBRequest
-
-
 
 REQUEST_TYPE_INFO = get_request_types()
 API_KEY = get_api_key()
@@ -22,13 +18,12 @@ engine = create_engine(DB_URL)
 Session = sessionmaker(bind=engine)
 session = Session()
 
+
 @click.command()
 @click.option('--request_type', default='movie', help='Type of TMdb API Request you wish to make')
-@click.option('--start_request_key',default=0,  help='Starting value for request key')
-
-def process_requests_for_type(request_type:str, start_request_key:int)->None:
-
-    "Retrieve information from TMdb API and insert into databse"
+@click.option('--start_request_key', default=0, help='Starting value for request key')
+def process_requests_for_type(request_type: str, start_request_key: int) -> None:
+    """Retrieve information from TMdb API and insert into database"""
     if REQUEST_TYPE_INFO.get(request_type, None) is None:
         print(Fore.RED + f'Request Type {request_type} does not exist. Exiting app.')
         print(Style.RESET_ALL)
@@ -38,16 +33,15 @@ def process_requests_for_type(request_type:str, start_request_key:int)->None:
 
     request_type_url = REQUEST_TYPE_INFO[request_type].URL
 
-    if start_request_key is None:
-         _last_key = session.query(func.max(TMDBRequest.request_key).filter(TMDBRequest.request_type == request_type)).one()
-         if _last_key[0]:
-             current_key = _last_key[0]
+    if start_request_key is None or start_request_key == 0:
+        _last_key = session.query(
+            func.max(TMDBRequest.request_key).filter(TMDBRequest.request_type == request_type)).one()
+        if _last_key[0]:
+            current_key = _last_key[0] + 1
     else:
-        current_key = start_request_key - 1
+        current_key = start_request_key
 
     while current_key < request_type_upper_limit:
-
-        current_key += 1
 
         print(f'Retrieving details for Type {request_type} and Request Id {current_key}')
 
@@ -83,7 +77,9 @@ def process_requests_for_type(request_type:str, start_request_key:int)->None:
 
             print('Record already exists so skipping Request')
 
-        session.close()
+        current_key += 1
+
+    session.close()
 
 
 if __name__ == "__main__":
