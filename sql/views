@@ -186,4 +186,252 @@ alter table movie
     owner to moraghan;
 
 
-select * from movie
+select * from movie where title like 'Skyfall'
+
+select *
+from tmdb_requests
+where request_type = 'collection' and response_status_code = 200 and request_key = 645
+
+select distinct request_type from tmdb_requests
+
+-- auto-generated definition
+
+drop table if exists company
+
+create table company
+(
+    id             integer,
+    title          text,
+    homepage       text,
+    logo_path     text,
+    description    text,
+    headquarters   text,
+    origin_country text,
+    parent_company text
+);
+
+alter table company
+    owner to moraghan;
+
+insert into company
+select request_key as id,
+       response_json->>'name' as title,
+       response_json->>'homepage'  as homepage,
+       response_json->>'logo_path' as logo_path,
+       response_json->>'description' as description,
+       response_json->>'headquarters' as headquarters,
+       response_json->>'origin_country' as origin_country,
+       response_json->>'parent_company' as parent_company
+
+from tmdb_requests
+where request_type = 'company' and response_status_code = 200
+
+drop table if exists movie_company
+
+create table movie_company
+(
+    movie_id integer,
+    company_id  integer
+);
+
+alter table movie_company
+    owner to moraghan
+
+
+insert into movie_company
+select distinct request_key as movie_id,
+                (jsonb_array_elements(response_json -> 'production_companies') ->> 'id')::int as company_id
+from tmdb_requests
+where request_type = 'movie'
+
+
+
+drop table if exists country
+
+create table country
+(
+    country_code  char(2),
+    country_descr text
+);
+
+alter table country
+    owner to moraghan;
+
+insert into country
+select distinct jsonb_array_elements(response_json -> 'production_countries') ->> 'iso_3166_1' as country_code,
+                jsonb_array_elements(response_json -> 'production_countries') ->> 'name' as country_descr
+
+from tmdb_requests
+where request_type = 'movie'
+
+drop table if exists movie_country
+
+create table movie_country
+(
+    movie_id integer,
+    country_code  char(2)
+);
+
+alter table movie_country
+    owner to moraghan;
+
+insert into movie_country
+select distinct request_key,
+                jsonb_array_elements(response_json -> 'production_countries') ->> 'iso_3166_1' as country_code
+
+from tmdb_requests
+where request_type = 'movie'
+
+---------
+drop table if exists genre
+
+create table genre
+(
+    genre_id integer,
+    genre_descr text
+);
+
+alter table genre
+    owner to moraghan;
+
+insert into genre
+select distinct (jsonb_array_elements(response_json -> 'genres') ->> 'id')::int as genre_id,
+                jsonb_array_elements(response_json -> 'genres') ->> 'name' as genre_descr
+
+from tmdb_requests
+where request_type = 'movie'
+
+drop table if exists movie_genre
+
+create table movie_genre
+(
+    movie_id integer,
+    genre_id  integer
+);
+
+insert into movie_genre
+select distinct request_key as movie_id,
+                (jsonb_array_elements(response_json -> 'genres') ->> 'id')::int as company_id
+from tmdb_requests
+where request_type = 'movie'
+
+----------------------------------------------------------------
+drop table if exists language
+
+create table language
+(
+    language_code char(2),
+    language_descr text,
+    english_descr text
+);
+
+alter table language
+    owner to moraghan;
+
+insert into language
+select distinct jsonb_array_elements(response_json -> 'spoken_languages') ->> 'iso_639_1' as language_code,
+                jsonb_array_elements(response_json -> 'spoken_languages') ->> 'name' as language_descr,
+                jsonb_array_elements(response_json -> 'spoken_languages') ->> 'english_name' as english_descr
+
+from tmdb_requests
+where request_type = 'movie'
+
+drop table if exists movie_spoken_language
+
+create table movie_spoken_language
+(
+    movie_id integer,
+    language_code  char(2)
+);
+
+insert into movie_spoken_language
+select distinct request_key as movie_id,
+                jsonb_array_elements(response_json -> 'spoken_languages') ->> 'iso_639_1' as language_code
+from tmdb_requests
+where request_type = 'movie'
+
+
+
+
+with cte as (
+
+)
+select cte.production_company_id::integer                   as production_company_id,
+       cte.production_company_descr::character varying(500) as production_company_descr,
+       cte.logo_path::character varying(500)                as logo_path,
+       cte.origin_country::character varying(500)           as origin_country
+from cte;
+
+with cte as (
+    select distinct jsonb_array_elements(tmdb_requests.response_json -> 'production_companies'::text) ->
+                    'id'::text                                                                                        as production_company_id,
+                    jsonb_array_elements(tmdb_requests.response_json -> 'production_companies'::text) ->>
+                    'name'::text                                                                                      as production_company_descr,
+                    jsonb_array_elements(tmdb_requests.response_json -> 'production_companies'::text) ->>
+                    'logo_path'::text                                                                                 as logo_path,
+                    jsonb_array_elements(tmdb_requests.response_json -> 'production_companies'::text) ->>
+                    'origin_country'::text                                                                            as origin_country
+    from tmdb_requests
+    where tmdb_requests.request_type::text = 'movie'::text
+)
+select cte.production_company_id::integer                   as production_company_id,
+       cte.production_company_descr::character varying(500) as production_company_descr,
+       cte.logo_path::character varying(500)                as logo_path,
+       cte.origin_country::character varying(500)           as origin_country
+from cte;
+
+
+drop table if exists movie
+
+create table movie
+(
+    movie_id              integer primary key ,
+    title                 text,
+    status                text,
+    imdb_id               text,
+    homepage              text,
+    poster_path           text,
+    backdrop_path         text,
+    original_title        text,
+    original_language     text,
+    tagline               text,
+    overview              text,
+    belongs_to_collection text,
+    runtime               text,
+    release_date          date,
+    budget                bigint,
+    revenue               bigint,
+    popularity            numeric(7,2),
+    vote_count            integer,
+    vote_average          numeric(5,2)
+);
+
+alter table movie
+    owner to moraghan;
+
+insert into movie
+select request_key as movie_id,
+       response_json->>'title' as title,
+       response_json->>'status'  as status,
+       response_json->>'imdb_id' as imdb_id,
+       response_json->>'homepage'  as homepage,
+       response_json->>'poster_path' as poster_path,
+       response_json->>'backdrop_path' as backdrop_path,
+       response_json->>'original_title' as original_title,
+       response_json->>'original_language' as original_language,
+       response_json->>'tagline' as tagline,
+       response_json->>'overview' as overview,
+       response_json->>'belongs_to_collection' as belongs_to_collection,
+       response_json->>'runtime' as runtime,
+       to_date(response_json->>'release_date','yyyy-mm-dd') as release_date,
+
+       (response_json->>'budget')::bigint as budget,
+       (response_json->>'revenue')::bigint as revenue,
+
+       (response_json->>'popularity')::numeric(7,2) as popularity,
+       (response_json->>'vote_count')::int as vote_count,
+       (response_json->>'vote_average')::numeric(5,2) as vote_average
+
+from tmdb_requests
+where request_type = 'movie' and response_status_code = 200
+

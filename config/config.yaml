@@ -31,7 +31,5 @@ TMDB_REQUEST_TYPES:
   keyword:
     MAX_REQUEST_KEY: 100000
     URL: 'https://api.themoviedb.org/3/keyword/{id}?api_key={api_key}'
-  country:
-    MAX_REQUEST_KEY: 1000000
-    URL: 'https://api.themoviedb.org/3/country/{id}?api_key={api_key}'
+
 
