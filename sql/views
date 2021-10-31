@@ -89,6 +89,101 @@ where response_json ->  'budget' = '0';
 select * from tmdb_requests
 where response_json -> 'title' = 'Tarzan';
 
-select * from tmdb_requests
-where response_json @> {'title':'Tarzan'}
+drop table if exists movie
 
+insert into movie
+select request_key as id,
+       response_json->>'title' as title,
+       response_json->>'status'  as status,
+       response_json->>'imdb_id' as imdb_id,
+       response_json->>'homepage'  as homepage,
+       response_json->>'poster_path' as poster_path,
+       response_json->>'backdrop_path' as backdrop_path,
+       response_json->>'original_title' as original_title,
+       response_json->>'original_language' as original_language,
+       response_json->>'tagline' as tagline,
+       response_json->>'overview' as overview,
+       response_json->>'belongs_to_collection' as belongs_to_collection,
+       response_json->>'runtime' as runtime,
+       to_date(response_json->>'release_date','yyyy-mm-dd') as release_date,
+
+       (response_json->>'budget')::bigint as budget,
+       (response_json->>'revenue')::bigint as revenue,
+
+       (response_json->>'popularity')::numeric(7,2) as popularity,
+       (response_json->>'vote_count')::int as vote_count,
+       (response_json->>'vote_average')::numeric(5,2) as vote_average
+
+from tmdb_requests
+where request_type = 'movie' and response_status_code = 200
+
+SELECT pg_size_pretty( pg_total_relation_size('movie') );
+SELECT pg_size_pretty( pg_total_relation_size('tmdb_requests') );
+
+vacuum movie
+select extract(year from release_date),
+       to_char(sum(budget), '$99,999,999,999') budget,
+       to_char(sum(revenue), '$99,999,999,999') revenue,
+       to_char(sum(revenue - budget), '$99,999,999,999') profit,
+       count(*) movie_count
+from movie
+where extract(year from release_date) between 1930 and 2021 and
+      vote_count > 10
+group by extract(year from release_date)
+
+select title,
+       budget,
+       revenue,
+       to_char(budget, '$999,999,999,999') budget,
+       to_char(revenue, '$999,999,999,999') revenue,
+       to_char(revenue - budget, '$999,999,999,999') profit
+
+from movie
+where imdb_id is not null and
+      vote_count > 10
+order by profit desc
+limit 15
+
+select * from movie where title = 'Operation Thunderbolt'
+
+
+
+
+with cte as
+         (
+             select release_date, to_date(release_date, 'yyyy-mm-dd') as converted_date
+             from movie
+         )
+select distinct * from cte where to_char(converted_date, 'yyyy-mm-dd') <> release_date
+-- auto-generated definition
+
+drop table if exists movie
+
+create table movie
+(
+    id                    integer,
+    title                 text,
+    status                text,
+    imdb_id               text,
+    homepage              text,
+    poster_path           text,
+    backdrop_path         text,
+    original_title        text,
+    original_language     text,
+    tagline               text,
+    overview              text,
+    belongs_to_collection text,
+    runtime               text,
+    release_date          date,
+    budget                bigint,
+    revenue               bigint,
+    popularity            numeric(7,2),
+    vote_count            integer,
+    vote_average          numeric(5,2)
+);
+
+alter table movie
+    owner to moraghan;
+
+
+select * from movie
